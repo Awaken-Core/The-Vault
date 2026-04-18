@@ -4,53 +4,43 @@ import { redirect } from 'next/navigation';
 import { API_BASE } from './constants';
 import { cookies } from 'next/headers';
 
-export const requireAuth = async () => {
-    const session = ""
+async function getSession() {
+    const cookieStore = await cookies();
+    const token = cookieStore.get('token')?.value;
+    if (!token) return null;
 
-    if (!session) {
-        redirect("/sign-in");
+    try {
+        const response = await fetch(`${API_BASE}/api/v1/user/me`, {
+            method: 'GET',
+            headers: { Authorization: `Bearer ${token}` },
+            cache: 'no-store',
+        });
+        if (!response.ok) return null;
+        const data = await response.json();
+        return data.user ?? null;
+    } catch {
+        return null;
     }
+}
 
-    return session;
+export const requireAuth = async () => {
+    const user = await getSession();
+    if (!user) redirect('/sign-in');
+    return user;
 };
 
 export const requireUnAuth = async () => {
-    const session = "";
-
-    if (session) {
-        redirect("/");
-    }
-
-    return session;
+    const user = await getSession();
+    if (user) redirect('/');
 };
 
 export const redirectToHomeIfSession = async () => {
-    const session = "";
-
-    if (session) {
-        redirect("/home");
-    }
-
-    return session;
-}
-
-export const getDBUser = async () => {
-    const cookieStore = await cookies();
-
-    const response = await fetch(`${API_BASE}/api/v1/user/fetch-user`, {
-        method: "GET",
-        headers: {
-            Cookie: cookieStore.toString(),
-        },
-        cache: "no-store",
-    });
-
-    if (!response.ok) {
-        throw new Error("Failed to fetch user");
-    }
-
-    const result = await response.json();
-
-    return result.user || [];
+    const user = await getSession();
+    if (user) redirect('/home');
 };
 
+export const getDBUser = async () => {
+    const user = await getSession();
+    if (!user) throw new Error('Not authenticated');
+    return user;
+};
