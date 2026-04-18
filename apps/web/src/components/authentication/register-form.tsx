@@ -8,18 +8,21 @@ import { apiPost, ApiError, setAuthCookie } from '@/lib/api';
 import type { AuthResponse } from '@/types/auth';
 import Link from 'next/link';
 
-type FormErrors = { email?: string; password?: string };
+type FormErrors = { name?: string; email?: string; password?: string };
 
-export function LoginForm({ className, ...props }: React.ComponentProps<"form">) {
-    const [formData, setFormData] = useState({ email: '', password: '' });
+export function RegisterForm({ className, ...props }: React.ComponentProps<"form">) {
+    const [formData, setFormData] = useState({ name: '', email: '', password: '' });
     const [errors, setErrors] = useState<FormErrors>({});
     const [isLoading, setIsLoading] = useState(false);
 
     const validate = (): boolean => {
         const next: FormErrors = {};
+        if (!formData.name) next.name = 'Name is required';
+        else if (formData.name.length < 2) next.name = 'Name must be at least 2 characters';
         if (!formData.email) next.email = 'Email is required';
         else if (!/\S+@\S+\.\S+/.test(formData.email)) next.email = 'Invalid email address';
         if (!formData.password) next.password = 'Password is required';
+        else if (formData.password.length < 6) next.password = 'Password must be at least 6 characters';
         setErrors(next);
         return Object.keys(next).length === 0;
     };
@@ -46,13 +49,13 @@ export function LoginForm({ className, ...props }: React.ComponentProps<"form">)
         setIsLoading(true);
         setErrors({});
         try {
-            const res = await apiPost<AuthResponse>('/auth/login', formData);
+            const res = await apiPost<AuthResponse>('/auth/register', formData);
             if (!res.token) throw new Error('Token missing in response');
             persist(res.token, res.user);
             window.location.href = '/';
         } catch (error) {
             setErrors({
-                email: error instanceof ApiError ? error.message : 'Invalid credentials. Please try again.',
+                email: error instanceof ApiError ? error.message : 'Registration failed. Please try again.',
             });
         } finally {
             setIsLoading(false);
@@ -69,7 +72,7 @@ export function LoginForm({ className, ...props }: React.ComponentProps<"form">)
             window.location.href = '/';
         } catch (error) {
             setErrors({
-                email: error instanceof ApiError ? error.message : 'Google login failed. Please try again.',
+                email: error instanceof ApiError ? error.message : 'Google sign-up failed. Please try again.',
             });
         } finally {
             setIsLoading(false);
@@ -84,12 +87,29 @@ export function LoginForm({ className, ...props }: React.ComponentProps<"form">)
         >
             <FieldGroup>
                 <div className="flex flex-col items-center gap-1 text-center">
-                    <h1 className="text-[20px] tracking-[-0.2px] font-bold font-sans">Login to your account</h1>
+                    <h1 className="text-[20px] tracking-[-0.2px] font-bold font-sans">Create an account</h1>
                     <p className="text-sm text-balance text-muted-foreground">
-                        Enter your email and password to login
+                        Fill in the details below to get started
                     </p>
                 </div>
                 <Separator className="bg-white/20" />
+
+                <Field>
+                    <Label htmlFor="name">Name</Label>
+                    <Input
+                        id="name"
+                        name="name"
+                        type="text"
+                        placeholder="Your name"
+                        value={formData.name}
+                        onChange={handleChange}
+                        disabled={isLoading}
+                        autoFocus
+                    />
+                    {errors.name && (
+                        <FieldError errors={[{ message: errors.name }]} />
+                    )}
+                </Field>
 
                 <Field>
                     <Label htmlFor="email">Email</Label>
@@ -101,7 +121,6 @@ export function LoginForm({ className, ...props }: React.ComponentProps<"form">)
                         value={formData.email}
                         onChange={handleChange}
                         disabled={isLoading}
-                        autoFocus
                     />
                     {errors.email && (
                         <FieldError errors={[{ message: errors.email }]} />
@@ -125,7 +144,7 @@ export function LoginForm({ className, ...props }: React.ComponentProps<"form">)
                 </Field>
 
                 <Button type="submit" className="w-full" disabled={isLoading}>
-                    {isLoading ? 'Signing in...' : 'Sign in'}
+                    {isLoading ? 'Creating account...' : 'Create account'}
                 </Button>
 
                 <FieldSeparator>or</FieldSeparator>
@@ -135,18 +154,18 @@ export function LoginForm({ className, ...props }: React.ComponentProps<"form">)
                         onSuccess={(res) => {
                             if (res.credential) handleGoogleSuccess(res.credential);
                         }}
-                        onError={() => setErrors({ email: 'Google login failed' })}
+                        onError={() => setErrors({ email: 'Google sign-up failed' })}
                         theme="filled_black"
                         size="large"
-                        text="continue_with"
+                        text="signup_with"
                         shape="pill"
                     />
                 </div>
 
                 <p className="text-center text-sm text-muted-foreground">
-                    Don&apos;t have an account?{' '}
-                    <Link href="/sign-up" className="text-foreground underline underline-offset-4 hover:text-primary">
-                        Sign up
+                    Already have an account?{' '}
+                    <Link href="/sign-in" className="text-foreground underline underline-offset-4 hover:text-primary">
+                        Sign in
                     </Link>
                 </p>
             </FieldGroup>

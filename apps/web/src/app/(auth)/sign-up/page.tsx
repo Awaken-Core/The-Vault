@@ -1,9 +1,9 @@
-import { LoginForm } from "@/components/authentication/login-form"
+import { RegisterForm } from "@/components/authentication/register-form"
 import ColorBends from "@/components/onboard/color-bend"
 import Image from "next/image"
 import Link from "next/link"
 
-export default function LoginPage() {
+export default function RegisterPage() {
     return (
         <div className="relative w-full overflow-hidden grid min-h-svh lg:grid-cols-2">
             <div className='absolute inset-0'>
@@ -36,7 +36,7 @@ export default function LoginPage() {
                 </div>
                 <div className="flex flex-1 items-center justify-center">
                     <div className="w-full max-w-xs">
-                        <LoginForm />
+                        <RegisterForm />
                     </div>
                 </div>
             </div>

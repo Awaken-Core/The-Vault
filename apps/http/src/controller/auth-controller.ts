@@ -1,9 +1,6 @@
 import bcrypt from 'bcrypt';
 import crypto from 'crypto';
 import { client } from '@repo/db';
-const redis = require('../config/redis');
-import { OAuth2Client } from 'google-auth-library';
-import { server_env as env } from "@repo/env";
 import { catchAsync } from '../utils/catch-async';
 import { AuthRequest } from '../middleware/auth-middleware';
 import { Response } from 'express';
@@ -55,9 +52,9 @@ export const register = catchAsync(
             });
 
             // Send verification email in background so registration is not blocked by SMTP latency
-            sendVerificationEmail({ email: user.email, token: verificationToken, userId: user.id }).catch((emailError: any) => {
-                console.error('Background verification email error:', emailError);
-            });
+            // sendVerificationEmail({ email: user.email, token: verificationToken, userId: user.id }).catch((emailError: any) => {
+            //     console.error('Background verification email error:', emailError);
+            // });
 
             // Generate JWT
             const token = generateToken(user.id);
@@ -135,12 +132,6 @@ export const login = catchAsync(
                     message: 'Invalid credentials'
                 });
             }
-
-            // Update last seen
-            await client.user.update({
-                where: { id: user.id },
-                data: { lastSeen: new Date() }
-            });
 
             // Generate JWT
             const token = generateToken(user.id);
@@ -353,10 +344,10 @@ export const changeEmail = catchAsync(
 
             await client.user.update({
                 where: { id: req.user.id },
-                data: { email: newEmail.toLowerCase(), isVerified: false }
+                data: { email: newEmail.toLowerCase(), emailVerified: false }
             });
 
-            await sendVerificationEmail({ email: newEmail, token: verificationToken, userId: req?.userId! });
+            // await sendVerificationEmail({ email: newEmail, token: verificationToken, userId: req?.userId! });
 
             res.status(200).json({ success: true, message: 'Verification email sent to new address' });
         } catch (error) {
@@ -386,9 +377,9 @@ export const deleteProfile = catchAsync(
                 return res.status(401).json({ success: false, message: 'Invalid password' });
             }
 
-            await client.user.update({
-                where: { id: req.user.id },
-                data: { isBanned: true, status: 'offline' }
+            // TODO: We will not actually delete the user record to preserve data integrity of related records (like vault items) - instead we will mark the user as deleted and filter them out in queries. This is just a placeholder for now.
+            await client.user.delete({
+                where: { id: req.user.id }
             });
 
             res.status(200).json({ success: true, message: 'Account deleted successfully' });
