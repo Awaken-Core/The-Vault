@@ -5,3 +5,192 @@ generator client {
 datasource db {
   provider = "postgresql"
 }
+
+enum SubscriptionTier {
+  FREE
+  PRO
+  ENTERPRISE
+}
+
+enum SubscriptionStatus {
+  ACTIVE
+  INACTIVE
+  CANCELED
+  PAST_DUE
+  UNPAID
+}
+
+enum PurchaseStatus {
+  PENDING
+  COMPLETED
+  REFUNDED
+  DISPUTED
+}
+
+enum InstallmentStatus {
+  PENDING
+  PAID
+  OVERDUE
+  FAILED
+}
+
+enum QuotationStatus {
+  DRAFT
+  SENT
+  ACCEPTED
+  REJECTED
+}
+
+enum Role {
+  USER
+  ADMIN
+}
+
+model User {
+  id              String         @id  @default(uuid())
+  name            String
+  email           String         @unique
+  emailVerified   Boolean        @default(false)
+  password        String?
+  image           String?
+  createdAt       DateTime       @default(now())
+  updatedAt       DateTime       @updatedAt
+  role            Role           @default(USER)
+  polarCustomerId String?        @unique
+  sessions        Session[]
+  subscriptions   Subscription[]
+  purchases       Purchase[]
+  quotations      Quotation[]
+
+  @@map("user")
+}
+
+model Session {
+  id        String   @id @default(uuid())
+  expiresAt DateTime
+  token     String   @unique
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  ipAddress String?
+  userAgent String?
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@map("session")
+}
+
+model Subscription {
+  id                  String             @id @default(uuid())
+  userId              String
+  user                User               @relation(fields: [userId], references: [id], onDelete: Cascade)
+  serviceId           String?
+  service             Service?           @relation(fields: [serviceId], references: [id])
+  polarSubscriptionId String             @unique
+  polarProductId      String?
+  tier                SubscriptionTier   @default(FREE)
+  status              SubscriptionStatus @default(ACTIVE)
+  currentPeriodStart  DateTime?
+  currentPeriodEnd    DateTime?
+  cancelAtPeriodEnd   Boolean            @default(false)
+  canceledAt          DateTime?
+  quotation           Quotation?
+  createdAt           DateTime           @default(now())
+  updatedAt           DateTime           @updatedAt
+
+  @@index([userId])
+  @@map("subscription")
+}
+
+model Purchase {
+  id               String                @id @default(uuid())
+  userId           String
+  user             User                  @relation(fields: [userId], references: [id], onDelete: Cascade)
+  polarOrderId     String?               @unique
+  amount           Decimal               @db.Decimal(12, 2)
+  currency         String                @default("usd")
+  status           PurchaseStatus        @default(PENDING)
+  installmentCount Int                   @default(1)
+  items            PurchaseItem[]
+  installments     PurchaseInstallment[]
+  quotation        Quotation?
+  createdAt        DateTime              @default(now())
+  updatedAt        DateTime              @updatedAt
+
+  @@index([userId])
+  @@map("purchase")
+}
+
+model PurchaseInstallment {
+  id           String            @id @default(uuid())
+  purchaseId   String
+  purchase     Purchase          @relation(fields: [purchaseId], references: [id], onDelete: Cascade)
+  number       Int
+  amount       Decimal           @db.Decimal(12, 2)
+  dueDate      DateTime
+  paidAt       DateTime?
+  status       InstallmentStatus @default(PENDING)
+  polarOrderId String?           @unique
+
+  @@unique([purchaseId, number])
+  @@index([purchaseId])
+  @@map("purchase_installment")
+}
+
+model PurchaseItem {
+  id         String   @id @default(uuid())
+  purchaseId String
+  purchase   Purchase @relation(fields: [purchaseId], references: [id], onDelete: Cascade)
+  productId  String
+  product    Product  @relation(fields: [productId], references: [id])
+  quantity   Int      @default(1)
+  unitPrice  Decimal  @db.Decimal(12, 2)
+
+  @@index([purchaseId])
+  @@map("purchase_item")
+}
+
+model Product {
+  id             String         @id @default(uuid())
+  name           String
+  description    String?
+  price          Decimal?       @db.Decimal(12, 2)
+  polarProductId String?        @unique
+  serviceId      String?
+  service        Service?       @relation(fields: [serviceId], references: [id])
+  purchaseItems  PurchaseItem[]
+  createdAt      DateTime       @default(now())
+  updatedAt      DateTime       @updatedAt
+
+  @@map("product")
+}
+
+model Service {
+  id            String         @id @default(uuid())
+  name          String
+  description   String?
+  price         Decimal?       @db.Decimal(12, 2)
+  createdAt     DateTime       @default(now())
+  updatedAt     DateTime       @updatedAt
+  subscriptions Subscription[]
+  products      Product[]
+
+  @@map("service")
+}
+
+model Quotation {
+  id             String          @id @default(uuid())
+  userId         String
+  user           User            @relation(fields: [userId], references: [id])
+  purchaseId     String?         @unique
+  purchase       Purchase?       @relation(fields: [purchaseId], references: [id])
+  subscriptionId String?         @unique
+  subscription   Subscription?   @relation(fields: [subscriptionId], references: [id])
+  status         QuotationStatus @default(DRAFT)
+  documentUrl    String?
+  notes          String?
+  createdAt      DateTime        @default(now())
+  updatedAt      DateTime        @updatedAt
+
+  @@map("quotation")
+}
