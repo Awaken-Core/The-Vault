@@ -1,6 +1,6 @@
 import { client } from "@repo/db";
 import { catchAsync } from "../utils/catch-async";
-import { AuthRequest } from "../middleware/auth-middleware";
+import { AuthRequest } from "../config/auth-request-config.js";
 import { Response } from "express";
 import { UserUpdateSchema } from "../types";
 

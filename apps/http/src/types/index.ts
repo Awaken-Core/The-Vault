@@ -28,3 +28,18 @@ export const LoginUserSchema = z.object({
 export const GoogleLoginSchema = z.object({
     googleToken: z.string().min(1, "Google token is required"),
 });
+
+export const InviteAdminSchema = z.object({
+    email: z.string().email("Email must be a valid email address"),
+});
+
+export const InviteAcceptAdminSchema = z.object({
+    email: z.string().email("Email must be a valid email address"),
+    name: z.string().min(2, "Name must be at least 2 characters").max(32, "Name must be at most 32 characters"),
+    password: z.string().min(6, "Password must be at least 6 characters").max(32, "Password must be at most 32 characters"),
+});
+
+export const RequestInvitationSchema = z.object({
+    email: z.string().email("Email must be a valid email address"),
+    message: z.string().max(500, "Message must be at most 500 characters").optional(),
+});

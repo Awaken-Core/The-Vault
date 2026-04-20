@@ -2,12 +2,11 @@ import bcrypt from 'bcrypt';
 import crypto from 'crypto';
 import { client } from '@repo/db';
 import { catchAsync } from '../utils/catch-async';
-import { AuthRequest } from '../middleware/auth-middleware';
+import { AuthRequest } from '../config/auth-request-config.js';
 import { Response } from 'express';
 import { EmailChangeSchema, GoogleLoginSchema, LoginUserSchema, PasswordChangeSchema, RegisterUserSchema } from '../types';
 import { google_oauth_client } from '../utils/google-oauth-client';
 import { generateToken } from '../utils/generate-token';
-import { sendVerificationEmail } from '../services/emai-service';
 
 // Register new user
 export const register = catchAsync(
@@ -58,6 +57,17 @@ export const register = catchAsync(
 
             // Generate JWT
             const token = generateToken(user.id);
+            const expiresAt = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000);
+
+            await client.session.create({
+                data: {
+                    userId: user.id,
+                    token,
+                    expiresAt,
+                    ipAddress: req.ip ?? req.socket.remoteAddress,
+                    userAgent: req.headers['user-agent'],
+                }
+            });
 
             // Set token as HTTP-only cookie
             res.cookie('token', token, {
@@ -135,6 +145,17 @@ export const login = catchAsync(
 
             // Generate JWT
             const token = generateToken(user.id);
+            const expiresAt = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000);
+
+            await client.session.create({
+                data: {
+                    userId: user.id,
+                    token,
+                    expiresAt,
+                    ipAddress: req.ip ?? req.socket.remoteAddress,
+                    userAgent: req.headers['user-agent'],
+                }
+            });
 
             // Set token as HTTP-only cookie
             res.cookie('token', token, {
@@ -143,7 +164,6 @@ export const login = catchAsync(
                 sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax',
                 maxAge: 7 * 24 * 60 * 60 * 1000 // 7 days
             });
-            console.log("node env", process.env.NODE_ENV)
 
             res.status(200).json({
                 success: true,
@@ -218,6 +238,17 @@ export const googleLogin = catchAsync(
 
             // Generate JWT
             const token = generateToken(user.id);
+            const expiresAt = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000);
+
+            await client.session.create({
+                data: {
+                    userId: user.id,
+                    token,
+                    expiresAt,
+                    ipAddress: req.ip ?? req.socket.remoteAddress,
+                    userAgent: req.headers['user-agent'],
+                }
+            });
 
             // Set token as HTTP-only cookie
             res.cookie('token', token, {
@@ -255,14 +286,11 @@ export const googleLogin = catchAsync(
 export const logout = catchAsync(
     async (req: AuthRequest, res: Response) => {
         try {
-            await client.user.update({
-                where: { id: req.userId },
-                data: {
-                    sessions: {
-                        deleteMany: {}
-                    }
-                }
-            });
+            const token = req.headers.authorization?.split(' ')[1] ?? req.cookies?.token;
+
+            if (token) {
+                await client.session.deleteMany({ where: { token } });
+            }
 
             // Clear the token cookie
             res.clearCookie('token', {
