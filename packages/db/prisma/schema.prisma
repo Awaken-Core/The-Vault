@@ -47,12 +47,13 @@ enum Role {
 }
 
 model User {
-  id              String         @id  @default(uuid())
+  id              String         @id @default(uuid())
   name            String
   email           String         @unique
   emailVerified   Boolean        @default(false)
   password        String?
   image           String?
+  isBanned        Boolean        @default(false)
   createdAt       DateTime       @default(now())
   updatedAt       DateTime       @updatedAt
   role            Role           @default(USER)
@@ -61,6 +62,7 @@ model User {
   subscriptions   Subscription[]
   purchases       Purchase[]
   quotations      Quotation[]
+  invitations     Invitation[]
 
   @@map("user")
 }
@@ -193,4 +195,27 @@ model Quotation {
   updatedAt      DateTime        @updatedAt
 
   @@map("quotation")
+}
+
+model Invitation {
+  id        String   @id @default(uuid())
+  email     String
+  token     String   @unique
+  invitedBy String
+  inviter   User     @relation(fields: [invitedBy], references: [id])
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("invitation")
+}
+
+model RequestInvitation {
+  id        String   @id @default(uuid())
+  email     String
+  message   String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("request_invitation")
 }

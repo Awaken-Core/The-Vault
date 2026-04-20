@@ -50,6 +50,10 @@ export const protect = async (
             throw new AppError("User not found", 404);
         };
 
+        if (user.role !== "ADMIN") {
+            throw new AppError("Forbidden. Admins only.", 403);
+        }
+
         req.userId = user.id;
         // req.isPremium = (user.subscriptionTier != "Free" && user.subscriptionStatus === "ACTIVE")
         req.user = user;
