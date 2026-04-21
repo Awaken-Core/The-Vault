@@ -9,9 +9,10 @@ import quotationRoutes from "./routes/quotation-routes";
 import productsRoutes from "./routes/product-routes";
 import purchaseRoutes from "./routes/purchase-routes";
 import serviceRoutes from "./routes/service-routes";
+import { server_env as env } from "@repo/env";
 const app = express();
 
-const allowedOrigins = ["http://localhost:3000",].filter(
+const allowedOrigins = [env.CLIENT_URL,].filter(
     (origin): origin is string => Boolean(origin),
 );
 
@@ -40,7 +41,7 @@ app.use("/api/v1/auth", authRoutes);
 app.use("/api/v1/user", userRoutes);
 app.use("/api/v1/admin", adminRoutes);
 app.use("/api/v1/invitations", invitationsRoutes);
-app.use("/api/v1/products", productsRoutes); 
+app.use("/api/v1/products", productsRoutes);
 app.use("/api/v1/quotations", quotationRoutes);
 app.use("/api/v1/purchases", purchaseRoutes);
 app.use("/api/v1/services", serviceRoutes);
