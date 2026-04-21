@@ -2,15 +2,11 @@ import { Response } from "express";
 import { catchAsync } from "../utils/catch-async";
 import { AuthRequest } from "../config/auth-request-config";
 import { client } from "@repo/db";
+import { updateAndCreateProductSchema } from "../types";
 
 export const getAllProducts = catchAsync(
     async (_req: AuthRequest, res: Response) => {
         const products = await client.product.findMany({
-            include: {
-                service: {
-                    select: { id: true, name: true },
-                },
-            },
             orderBy: { createdAt: "desc" },
         });
 
@@ -24,9 +20,6 @@ export const getProductById = catchAsync(
 
         const product = await client.product.findUnique({
             where: { id },
-            include: {
-                service: { select: { id: true, name: true } },
-            },
         });
 
         if (!product) {
@@ -39,14 +32,16 @@ export const getProductById = catchAsync(
 
 export const createProduct = catchAsync(
     async (req: AuthRequest, res: Response) => {
-        const { name, description, price, polarProductId, serviceId } = req.body;
 
-        if (!name) {
-            return res.status(400).json({ success: false, message: "Product name is required" });
+        const { data, success } = updateAndCreateProductSchema.safeParse(req.body);
+
+        if (!success) {
+            return res.status(400).json({ success: false, message: "Invalid request data", errors: data });
         }
+        const { name, description, price, polarProductId } = data;
 
         const product = await client.product.create({
-            data: { name, description, price, polarProductId, serviceId },
+            data: { name: name ?? "", description, price: price ?? 0, polarProductId },
         });
 
         res.status(201).json({ success: true, data: product });
@@ -56,7 +51,14 @@ export const createProduct = catchAsync(
 export const updateProduct = catchAsync(
     async (req: AuthRequest, res: Response) => {
         const id = req.params.id as string;
-        const { name, description, price, polarProductId, serviceId } = req.body;
+
+        const { data, success } = updateAndCreateProductSchema.safeParse(req.body);
+
+        if (!success) {
+            return res.status(400).json({ success: false, message: "Invalid request data", errors: data });
+        }
+
+        const { name, description, price, polarProductId } = data;
 
         const existing = await client.product.findUnique({ where: { id } });
         if (!existing) {
@@ -65,7 +67,7 @@ export const updateProduct = catchAsync(
 
         const product = await client.product.update({
             where: { id },
-            data: { name, description, price, polarProductId, serviceId },
+            data: { name, description, price, polarProductId },
         });
 
         res.status(200).json({ success: true, data: product });
