@@ -2,17 +2,17 @@
   "name": "@repo/db",
   "module": "src/index.ts",
   "type": "module",
-   "scripts": {
-        "db:generate": "prisma generate",
-        "db:migrate": "prisma migrate",
-        "db:migrate_dev": "prisma migrate dev",
-        "db:studio": "prisma studio",
-        "db:push": "prisma db push",
-        "dev": "docker-compose up -d && tsc --watch",
-        "build": "tsc",
-        "lint": "eslint src",
-        "preinstall": "prisma generate"
-    },
+  "scripts": {
+    "db:generate": "prisma generate",
+    "db:migrate": "prisma migrate",
+    "db:migrate_dev": "prisma migrate dev",
+    "db:studio": "prisma studio",
+    "db:push": "prisma db push",
+    "dev": "docker-compose up -d && tsc --watch",
+    "build": "tsc",
+    "lint": "eslint src",
+    "preinstall": "prisma generate"
+  },
   "exports": {
     ".": {
       "default": "./src/index.ts"
@@ -30,6 +30,7 @@
     "typescript": "^5"
   },
   "dependencies": {
+    "@repo/env": "workspace:*",
     "@prisma/adapter-pg": "^7.4.0",
     "@prisma/client": "^7.4.0",
     "@types/pg": "^8.16.0",
