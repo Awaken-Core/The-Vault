@@ -1,7 +1,6 @@
 "use server";
 
 import { redirect } from 'next/navigation';
-import { API_BASE } from './constants';
 import { cookies } from 'next/headers';
 
 async function getSession() {
@@ -10,7 +9,7 @@ async function getSession() {
     if (!token) return null;
 
     try {
-        const response = await fetch(`${API_BASE}/api/v1/user/me`, {
+        const response = await fetch(`${process.env.NEXT_PUBLIC_API_BASE}/api/v1/user/me`, {
             method: 'GET',
             headers: { Authorization: `Bearer ${token}` },
             cache: 'no-store',

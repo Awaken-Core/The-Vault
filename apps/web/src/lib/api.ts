@@ -1,5 +1,4 @@
 import axios, { AxiosError } from 'axios';
-import { API_BASE } from '@/utils/constants';
 
 export class ApiError extends Error {
     constructor(
@@ -12,7 +11,7 @@ export class ApiError extends Error {
 }
 
 const axiosInstance = axios.create({
-    baseURL: `${API_BASE}/api/v1`,
+    baseURL: `${process.env.NEXT_PUBLIC_API_BASE}/api/v1`,
     withCredentials: true,
 });
 
