@@ -1,9 +1,7 @@
-import React from 'react'
+import { redirect } from 'next/navigation'
 
 const Home = () => {
-  return (
-    <div>Home</div>
-  )
+    return redirect('/home/analytics');
 }
 
 export default Home;

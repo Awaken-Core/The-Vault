@@ -4,7 +4,7 @@ import { redirect } from "next/navigation";
 const RootPage = async () => {
     await requireAuth();
 
-    return redirect("/home");
+    return redirect("/home/analytics");
 };
 
 export default RootPage;

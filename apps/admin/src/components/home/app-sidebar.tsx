@@ -2,24 +2,18 @@
 
 import * as React from "react"
 import {
-  IconCamera,
+  IconBuildingStore,
   IconChartBar,
-  IconDashboard,
-  IconDatabase,
-  IconFileAi,
-  IconFileDescription,
-  IconFileWord,
-  IconFolder,
+  IconContract,
   IconHelp,
   IconInnerShadowTop,
+  IconLayoutDashboardFilled,
   IconListDetails,
-  IconReport,
   IconSearch,
   IconSettings,
+  IconUserPlus,
   IconUsers,
 } from "@tabler/icons-react"
-
-import { NavDocuments } from "@/components/home/nav-documents"
 import { NavMain } from "@/components/home/nav-main"
 import { NavSecondary } from "@/components/home/nav-secondary"
 import { NavUser } from "@/components/home/nav-user"
@@ -33,127 +27,70 @@ import {
   SidebarMenuItem,
 } from "@repo/ui"
 import Link from "next/link"
+import { useAuthStore } from "@/store/auth-store"
 
 const data = {
-  user: {
-    name: "shadcn",
-    email: "m@example.com",
-    avatar: "/avatars/shadcn.jpg",
-  },
   navMain: [
     {
-      title: "Dashboard",
-      url: "#",
-      icon: IconDashboard,
-    },
-    {
-      title: "Lifecycle",
-      url: "#",
-      icon: IconListDetails,
-    },
-    {
       title: "Analytics",
-      url: "#",
+      url: "/analytics", // This is nothing but Analytics of the business
       icon: IconChartBar,
     },
     {
-      title: "Projects",
-      url: "#",
-      icon: IconFolder,
+      title: "Products",
+      url: "/products",
+      icon: IconListDetails,
     },
     {
-      title: "Team",
-      url: "#",
+      title: "Services",
+      url: "/services",
+      icon: IconLayoutDashboardFilled,
+    },
+    {
+      title: "Orders",
+      url: "/orders",
+      icon: IconBuildingStore,
+    },
+    {
+      title: "Contracts",
+      url: "/contracts",
+      icon: IconContract,
+    },
+    {
+      title: "Users",
+      url: "/users",
+      icon: IconUserPlus,
+    },
+    {
+      title: "Profile",
+      url: "/profile",
       icon: IconUsers,
-    },
-  ],
-  navClouds: [
-    {
-      title: "Capture",
-      icon: IconCamera,
-      isActive: true,
-      url: "#",
-      items: [
-        {
-          title: "Active Proposals",
-          url: "#",
-        },
-        {
-          title: "Archived",
-          url: "#",
-        },
-      ],
-    },
-    {
-      title: "Proposal",
-      icon: IconFileDescription,
-      url: "#",
-      items: [
-        {
-          title: "Active Proposals",
-          url: "#",
-        },
-        {
-          title: "Archived",
-          url: "#",
-        },
-      ],
-    },
-    {
-      title: "Prompts",
-      icon: IconFileAi,
-      url: "#",
-      items: [
-        {
-          title: "Active Proposals",
-          url: "#",
-        },
-        {
-          title: "Archived",
-          url: "#",
-        },
-      ],
     },
   ],
   navSecondary: [
     {
       title: "Settings",
-      url: "#",
+      url: "/settings",
       icon: IconSettings,
     },
     {
       title: "Get Help",
-      url: "#",
+      url: "/help",
       icon: IconHelp,
     },
     {
       title: "Search",
-      url: "#",
+      url: "/search",
       icon: IconSearch,
     },
   ],
-  documents: [
-    {
-      name: "Data Library",
-      url: "#",
-      icon: IconDatabase,
-    },
-    {
-      name: "Reports",
-      url: "#",
-      icon: IconReport,
-    },
-    {
-      name: "Word Assistant",
-      url: "#",
-      icon: IconFileWord,
-    },
-  ],
-}
+};
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
+  const { user } = useAuthStore();
+
   return (
-    <Sidebar collapsible="offcanvas" {...props}>
+    <Sidebar collapsible="icon" {...props}>
       <SidebarHeader>
         <SidebarMenu>
           <SidebarMenuItem>
@@ -161,22 +98,24 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
               asChild
               className="data-[slot=sidebar-menu-button]:p-1.5!"
             >
-              <a href="#">
+              <div>
                 <IconInnerShadowTop className="size-5!" />
                 <Link href={'/home'} className="text-base font-semibold tracking-tight">Awaken Studios.</Link>
-              </a>
+              </div>
             </SidebarMenuButton>
           </SidebarMenuItem>
         </SidebarMenu>
       </SidebarHeader>
       <SidebarContent>
         <NavMain items={data.navMain} />
-        <NavDocuments items={data.documents} />
         <NavSecondary items={data.navSecondary} className="mt-auto" />
       </SidebarContent>
       <SidebarFooter>
-        <NavUser user={data.user} />
+        {user && (
+          <NavUser user={user!} />
+        )}
       </SidebarFooter>
     </Sidebar>
   )
-}
+};
+

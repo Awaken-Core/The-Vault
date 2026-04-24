@@ -1,11 +1,15 @@
 import { AppSidebar } from "@/components/home/app-sidebar"
 import { SiteHeader } from "@/components/home/site-header"
+import { requireAuth } from "@/utils/auth-utils";
 import {
     SidebarInset,
     SidebarProvider,
 } from "@repo/ui";
+import { redirect } from "next/navigation";
 
-export default function HomeLayout({ children }: { children: React.ReactNode }) {
+export default async function HomeLayout({ children }: { children: React.ReactNode }) {
+    const user = await requireAuth();
+
     return (
         <SidebarProvider
             style={

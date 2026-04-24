@@ -4,8 +4,7 @@ import { useState } from 'react';
 import { cn } from "@/lib/utils";
 import { Button, Input, Label, Separator, FieldGroup, Field, FieldError, FieldSeparator } from "@repo/ui";
 import { GoogleLogin } from '@react-oauth/google';
-import { apiPost, ApiError, setAuthCookie } from '@/lib/api';
-import type { AuthResponse } from '@/types/auth';
+import { useLogin, useGoogleLogin } from '@/hooks/use-auth';
 import Link from 'next/link';
 
 type FormErrors = { email?: string; password?: string };
@@ -13,7 +12,10 @@ type FormErrors = { email?: string; password?: string };
 export function LoginForm({ className, ...props }: React.ComponentProps<"form">) {
     const [formData, setFormData] = useState({ email: '', password: '' });
     const [errors, setErrors] = useState<FormErrors>({});
-    const [isLoading, setIsLoading] = useState(false);
+
+    const login = useLogin();
+    const googleLogin = useGoogleLogin();
+    const isLoading = login.isPending || googleLogin.isPending;
 
     const validate = (): boolean => {
         const next: FormErrors = {};
@@ -32,48 +34,10 @@ export function LoginForm({ className, ...props }: React.ComponentProps<"form">)
         }
     };
 
-    const persist = (token: string, user: AuthResponse['user']) => {
-        if (typeof window !== 'undefined') {
-            localStorage.setItem('token', token);
-            localStorage.setItem('user', JSON.stringify(user));
-        }
-        setAuthCookie(token);
-    };
-
-    const handleSubmit = async (e: React.FormEvent) => {
+    const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
         if (!validate()) return;
-        setIsLoading(true);
-        setErrors({});
-        try {
-            const res = await apiPost<AuthResponse>('/admin/login', formData);
-            if (!res.token) throw new Error('Token missing in response');
-            persist(res.token, res.user);
-            window.location.href = '/';
-        } catch (error) {
-            setErrors({
-                email: error instanceof ApiError ? error.message : 'Invalid credentials. Please try again.',
-            });
-        } finally {
-            setIsLoading(false);
-        }
-    };
-
-    const handleGoogleSuccess = async (credential: string) => {
-        setIsLoading(true);
-        setErrors({});
-        try {
-            const res = await apiPost<AuthResponse>('/admin/google-login', { googleToken: credential });
-            if (!res.token) throw new Error('Token missing in response');
-            persist(res.token, res.user);
-            window.location.href = '/';
-        } catch (error) {
-            setErrors({
-                email: error instanceof ApiError ? error.message : 'Google login failed. Please try again.',
-            });
-        } finally {
-            setIsLoading(false);
-        }
+        login.mutate(formData);
     };
 
     return (
@@ -125,7 +89,7 @@ export function LoginForm({ className, ...props }: React.ComponentProps<"form">)
                 </Field>
 
                 <Button type="submit" className="w-full" disabled={isLoading}>
-                    {isLoading ? 'Signing in...' : 'Sign in'}
+                    {login.isPending ? 'Signing in...' : 'Sign in'}
                 </Button>
 
                 <FieldSeparator>or</FieldSeparator>
@@ -133,7 +97,7 @@ export function LoginForm({ className, ...props }: React.ComponentProps<"form">)
                 <div className="flex justify-center">
                     <GoogleLogin
                         onSuccess={(res) => {
-                            if (res.credential) handleGoogleSuccess(res.credential);
+                            if (res.credential) googleLogin.mutate({ googleToken: res.credential });
                         }}
                         onError={() => setErrors({ email: 'Google login failed' })}
                         theme="filled_black"
@@ -152,4 +116,4 @@ export function LoginForm({ className, ...props }: React.ComponentProps<"form">)
             </FieldGroup>
         </form>
     );
-}
+};

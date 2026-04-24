@@ -1,4 +1,3 @@
-import axios from 'axios';
 import type {
     AuthResponse,
     LoginPayload,
@@ -7,18 +6,7 @@ import type {
     ProfileResponse,
 } from '@/types/auth';
 
-const authAxios = axios.create({
-    baseURL: `${process.env.NEXT_PUBLIC_API_BASE}/api/v1`,
-    withCredentials: true,
-});
-
-authAxios.interceptors.request.use((config) => {
-    if (typeof window !== 'undefined') {
-        const token = localStorage.getItem('token');
-        if (token) config.headers.Authorization = `Bearer ${token}`;
-    }
-    return config;
-});
+import authAxios from './axios';
 
 export const loginApi = (payload: LoginPayload) =>
     authAxios.post<AuthResponse>('/auth/login', payload).then((r) => r.data);

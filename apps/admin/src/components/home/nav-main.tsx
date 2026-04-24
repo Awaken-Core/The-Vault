@@ -2,7 +2,7 @@
 
 import { IconCirclePlusFilled, IconMail, type Icon } from "@tabler/icons-react"
 
-import { Button } from "@repo/ui"
+import { Button, cn } from "@repo/ui"
 import {
   SidebarGroup,
   SidebarGroupContent,
@@ -10,6 +10,7 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
 } from "@repo/ui"
+import { usePathname, useRouter } from "next/navigation"
 
 export function NavMain({
   items,
@@ -20,6 +21,10 @@ export function NavMain({
     icon?: Icon
   }[]
 }) {
+  const router = useRouter();
+  const pathname = usePathname();
+  const currentPath = pathname.split('/').filter(Boolean).slice(1)[0];
+
   return (
     <SidebarGroup>
       <SidebarGroupContent className="flex flex-col gap-2">
@@ -45,7 +50,7 @@ export function NavMain({
         <SidebarMenu>
           {items.map((item) => (
             <SidebarMenuItem key={item.title}>
-              <SidebarMenuButton tooltip={item.title}>
+              <SidebarMenuButton tooltip={item.title} onClick={() => router.push(`/home/${item.url}`)} isActive={currentPath.toLowerCase() === item.title.toLowerCase() ? true : false}>
                 {item.icon && <item.icon />}
                 <span>{item.title}</span>
               </SidebarMenuButton>
@@ -55,4 +60,4 @@ export function NavMain({
       </SidebarGroupContent>
     </SidebarGroup>
   )
-}
+};

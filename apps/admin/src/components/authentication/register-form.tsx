@@ -4,8 +4,7 @@ import { useState } from 'react';
 import { cn } from "@/lib/utils";
 import { Button, Input, Label, Separator, FieldGroup, Field, FieldError, FieldSeparator } from "@repo/ui";
 import { GoogleLogin } from '@react-oauth/google';
-import { apiPost, ApiError, setAuthCookie } from '@/lib/api';
-import type { AuthResponse } from '@/types/auth';
+import { useRegister, useGoogleLogin } from '@/hooks/use-auth';
 import Link from 'next/link';
 
 type FormErrors = { name?: string; email?: string; password?: string };
@@ -13,7 +12,10 @@ type FormErrors = { name?: string; email?: string; password?: string };
 export function RegisterForm({ className, ...props }: React.ComponentProps<"form">) {
     const [formData, setFormData] = useState({ name: '', email: '', password: '' });
     const [errors, setErrors] = useState<FormErrors>({});
-    const [isLoading, setIsLoading] = useState(false);
+
+    const register = useRegister();
+    const googleLogin = useGoogleLogin();
+    const isLoading = register.isPending || googleLogin.isPending;
 
     const validate = (): boolean => {
         const next: FormErrors = {};
@@ -35,48 +37,10 @@ export function RegisterForm({ className, ...props }: React.ComponentProps<"form
         }
     };
 
-    const persist = (token: string, user: AuthResponse['user']) => {
-        if (typeof window !== 'undefined') {
-            localStorage.setItem('token', token);
-            localStorage.setItem('user', JSON.stringify(user));
-        }
-        setAuthCookie(token);
-    };
-
-    const handleSubmit = async (e: React.FormEvent) => {
+    const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
         if (!validate()) return;
-        setIsLoading(true);
-        setErrors({});
-        try {
-            const res = await apiPost<AuthResponse>('/admin/register', formData);
-            if (!res.token) throw new Error('Token missing in response');
-            persist(res.token, res.user);
-            window.location.href = '/';
-        } catch (error) {
-            setErrors({
-                email: error instanceof ApiError ? error.message : 'Registration failed. Please try again.',
-            });
-        } finally {
-            setIsLoading(false);
-        }
-    };
-
-    const handleGoogleSuccess = async (credential: string) => {
-        setIsLoading(true);
-        setErrors({});
-        try {
-            const res = await apiPost<AuthResponse>('/admin/google-login', { googleToken: credential });
-            if (!res.token) throw new Error('Token missing in response');
-            persist(res.token, res.user);
-            window.location.href = '/';
-        } catch (error) {
-            setErrors({
-                email: error instanceof ApiError ? error.message : 'Google sign-up failed. Please try again.',
-            });
-        } finally {
-            setIsLoading(false);
-        }
+        register.mutate(formData);
     };
 
     return (
@@ -144,7 +108,7 @@ export function RegisterForm({ className, ...props }: React.ComponentProps<"form
                 </Field>
 
                 <Button type="submit" className="w-full" disabled={isLoading}>
-                    {isLoading ? 'Creating account...' : 'Create account'}
+                    {register.isPending ? 'Creating account...' : 'Create account'}
                 </Button>
 
                 <FieldSeparator>or</FieldSeparator>
@@ -152,7 +116,7 @@ export function RegisterForm({ className, ...props }: React.ComponentProps<"form
                 <div className="flex justify-center">
                     <GoogleLogin
                         onSuccess={(res) => {
-                            if (res.credential) handleGoogleSuccess(res.credential);
+                            if (res.credential) googleLogin.mutate({ googleToken: res.credential });
                         }}
                         onError={() => setErrors({ email: 'Google sign-up failed' })}
                         theme="filled_black"

@@ -10,6 +10,8 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
 } from "@repo/ui"
+import Link from "next/link"
+import { usePathname } from "next/navigation"
 
 export function NavSecondary({
   items,
@@ -21,17 +23,20 @@ export function NavSecondary({
     icon: Icon
   }[]
 } & React.ComponentPropsWithoutRef<typeof SidebarGroup>) {
+  const pathname = usePathname();
+  const currentPath = pathname.split('/').filter(Boolean).slice(1)[0];
+  
   return (
     <SidebarGroup {...props}>
       <SidebarGroupContent>
         <SidebarMenu>
           {items.map((item) => (
             <SidebarMenuItem key={item.title}>
-              <SidebarMenuButton asChild>
-                <a href={item.url}>
+              <SidebarMenuButton asChild isActive={currentPath.toLowerCase() === item.title.toLowerCase() ? true : false}>
+                <Link href={`/home${item.url}`}>
                   <item.icon />
                   <span>{item.title}</span>
-                </a>
+                </Link>
               </SidebarMenuButton>
             </SidebarMenuItem>
           ))}
@@ -39,4 +44,4 @@ export function NavSecondary({
       </SidebarGroupContent>
     </SidebarGroup>
   )
-}
+};

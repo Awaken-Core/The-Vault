@@ -3,7 +3,7 @@
 import { useMutation, useQuery } from '@tanstack/react-query';
 import { useRouter } from 'next/navigation';
 import { toast } from 'sonner';
-import { loginApi, registerApi, googleLoginApi, logoutApi, getProfileApi } from '@/lib/auth-client';
+import { loginApi, registerApi, googleLoginApi, logoutApi, getProfileApi } from '@/lib/clients/auth-client';
 import { useAuthStore } from '@/store/auth-store';
 import type { AxiosError } from 'axios';
 
@@ -18,7 +18,7 @@ export const useLogin = () => {
         onSuccess: (data) => {
             setUser(data.user, data.token);
             toast.success(data.message);
-            router.push('/');
+            router.push('/home/analytics');
         },
         onError: (error: ApiError) => {
             toast.error(error.response?.data?.message ?? 'Login failed');
@@ -35,7 +35,7 @@ export const useRegister = () => {
         onSuccess: (data) => {
             setUser(data.user, data.token);
             toast.success(data.message);
-            router.push('/');
+            router.push('/home/analytics');
         },
         onError: (error: ApiError) => {
             toast.error(error.response?.data?.message ?? 'Registration failed');
@@ -52,7 +52,7 @@ export const useGoogleLogin = () => {
         onSuccess: (data) => {
             setUser(data.user, data.token);
             toast.success(data.message);
-            router.push('/');
+            router.push('/home/analytics');
         },
         onError: (error: ApiError) => {
             toast.error(error.response?.data?.message ?? 'Google login failed');

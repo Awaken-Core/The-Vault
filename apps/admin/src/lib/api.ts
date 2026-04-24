@@ -1,4 +1,5 @@
-import axios, { AxiosError } from 'axios';
+import { AxiosError } from "axios";
+import axiosInstance from "./axios";
 
 export class ApiError extends Error {
     constructor(
@@ -9,19 +10,6 @@ export class ApiError extends Error {
         this.name = 'ApiError';
     }
 }
-
-const axiosInstance = axios.create({
-    baseURL: `${process.env.NEXT_PUBLIC_API_BASE}/api/v1`,
-    withCredentials: true,
-});
-
-axiosInstance.interceptors.request.use((config) => {
-    if (typeof window !== 'undefined') {
-        const token = localStorage.getItem('token');
-        if (token) config.headers.Authorization = `Bearer ${token}`;
-    }
-    return config;
-});
 
 async function request<T>(fn: () => Promise<{ data: T }>): Promise<T> {
     try {
