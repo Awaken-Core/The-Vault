@@ -12,7 +12,7 @@ import serviceRoutes from "./routes/service-routes";
 import { server_env as env } from "@repo/env";
 const app = express();
 
-const allowedOrigins = [env.CLIENT_URL,].filter(
+const allowedOrigins = [env.CLIENT_URL, env.ADMIN_URL,].filter(
     (origin): origin is string => Boolean(origin),
 );
 

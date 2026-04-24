@@ -1,7 +1,8 @@
 import { Router } from "express";
 import type { Router as ExpressRouter } from "express";
 import { protect } from "../middleware/admin-middleware";
-import { changeEmail, changePassword, deleteProfile, getProfile, googleLogin, login, logout, register } from "../controller/auth-controller";
+// import { changeEmail, changePassword, deleteProfile, getProfile, googleLogin, login, logout, register } from "../controller/auth-controller";
+import { changeEmail, changePassword, deleteProfile, getProfile, googleLogin, login, logout, register } from "../controller/admin-auth-controller";
 import { BanUser } from "../controller/admin-auth-controller";
 const router: ExpressRouter = Router();
 
