@@ -1,8 +1,9 @@
-"use client";
-
+import { requireAuth } from "@/utils/auth-utils";
 import { redirect } from "next/navigation";
 
-const RootPage = () => {
+const RootPage = async () => {
+    await requireAuth();
+
     return redirect("/home");
 };
 
