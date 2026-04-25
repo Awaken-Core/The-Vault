@@ -1,5 +1,4 @@
 import { RegisterForm } from "@/components/authentication/register-form"
-import ColorBends from "@/components/onboard/color-bend"
 import Image from "next/image"
 import Link from "next/link"
 
@@ -7,20 +6,6 @@ export default function RegisterPage() {
     return (
         <div className="relative w-full overflow-hidden grid min-h-svh lg:grid-cols-2">
             <div className='absolute inset-0'>
-                <ColorBends
-                    className='h-full w-full brightness-[0.4]'
-                    colors={["#ff5c7a", "#8a5cff", "#00ffd1"]}
-                    rotation={0}
-                    speed={0.2}
-                    scale={1}
-                    frequency={1}
-                    warpStrength={1}
-                    mouseInfluence={1}
-                    parallax={0.5}
-                    noise={0.1}
-                    transparent
-                    autoRotate={0}
-                />
             </div>
             <div className="relative z-10 flex flex-col gap-4 p-6 md:p-10">
                 <div className="flex justify-center gap-2 md:justify-start">
