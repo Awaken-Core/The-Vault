@@ -56,7 +56,7 @@ export const register = catchAsync(
             // });
 
             // Generate JWT
-            const token = generateToken(user.id);
+            const token = generateToken(user.id, user.role);
             const expiresAt = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000);
 
             await client.session.create({
@@ -84,6 +84,7 @@ export const register = catchAsync(
                 user: {
                     id: user.id,
                     name: user.name,
+                    role: user.role,
                     email: user.email,
                 },
             });
@@ -144,7 +145,7 @@ export const login = catchAsync(
             }
 
             // Generate JWT
-            const token = generateToken(user.id);
+            const token = generateToken(user.id, user.role);
             const expiresAt = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000);
 
             await client.session.create({
@@ -174,6 +175,7 @@ export const login = catchAsync(
                     name: user.name,
                     email: user.email,
                     image: user.image,
+                    role: user.role,
                     emailVerified: user.emailVerified
                 }
             });
@@ -190,7 +192,6 @@ export const login = catchAsync(
 // Google OAuth login
 export const googleLogin = catchAsync(
     async (req: AuthRequest, res: Response) => {
-
         try {
             const { data, success } = GoogleLoginSchema.safeParse(req.body);
 
@@ -237,7 +238,7 @@ export const googleLogin = catchAsync(
             }
 
             // Generate JWT
-            const token = generateToken(user.id);
+            const token = generateToken(user.id, user.role);
             const expiresAt = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000);
 
             await client.session.create({
@@ -267,6 +268,7 @@ export const googleLogin = catchAsync(
                     name: user.name,
                     email: user.email,
                     image: user.image,
+                    role: user.role,
                     emailVerified: user.emailVerified
                 }
             });

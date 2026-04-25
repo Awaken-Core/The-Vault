@@ -33,22 +33,23 @@ enum Role {
 }
 
 model User {
-  id               String           @id @default(uuid())
+  id               String            @id @default(uuid())
   name             String
-  email            String           @unique
-  emailVerified    Boolean          @default(false)
+  email            String            @unique
+  emailVerified    Boolean           @default(false)
   password         String?
   image            String?
-  isBanned         Boolean          @default(false)
-  createdAt        DateTime         @default(now())
-  updatedAt        DateTime         @updatedAt
-  role             Role             @default(USER)
-  polarCustomerId  String?          @unique
+  isBanned         Boolean           @default(false)
+  createdAt        DateTime          @default(now())
+  updatedAt        DateTime          @updatedAt
+  role             Role              @default(USER)
+  polarCustomerId  String?           @unique
   sessions         Session[]
   productPurchases ProductPurchase[]
   servicePurchases ServicePurchase[]
   quotations       Quotation[]
   invitations      Invitation[]
+  serviceBundles   ServiceBundle[]
 
   @@map("user")
 }
@@ -88,19 +89,19 @@ model ProductPurchase {
 
 // Service engagement (web dev, design, etc.) — supports installments
 model ServicePurchase {
-  id               String                      @id @default(uuid())
+  id               String                       @id @default(uuid())
   userId           String
-  user             User                        @relation(fields: [userId], references: [id], onDelete: Cascade)
-  polarOrderId     String?                     @unique
-  amount           Decimal                     @db.Decimal(12, 2)
-  currency         String                      @default("usd")
-  status           PurchaseStatus              @default(PENDING)
-  installmentCount Int                         @default(1)
+  user             User                         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  polarOrderId     String?                      @unique
+  amount           Decimal                      @db.Decimal(12, 2)
+  currency         String                       @default("usd")
+  status           PurchaseStatus               @default(PENDING)
+  installmentCount Int                          @default(1)
   services         Service[]
   installments     ServicePurchaseInstallment[]
   quotation        Quotation?
-  createdAt        DateTime                    @default(now())
-  updatedAt        DateTime                    @updatedAt
+  createdAt        DateTime                     @default(now())
+  updatedAt        DateTime                     @updatedAt
 
   @@index([userId])
   @@map("service_purchase")
@@ -144,23 +145,24 @@ model Service {
   createdAt        DateTime          @default(now())
   updatedAt        DateTime          @updatedAt
   servicePurchases ServicePurchase[]
+  serviceBundles   ServiceBundle[]
 
   @@map("service")
 }
 
 model Quotation {
-  id                String          @id @default(uuid())
+  id                String           @id @default(uuid())
   userId            String
-  user              User            @relation(fields: [userId], references: [id])
-  productPurchaseId String?         @unique
+  user              User             @relation(fields: [userId], references: [id])
+  productPurchaseId String?          @unique
   productPurchase   ProductPurchase? @relation(fields: [productPurchaseId], references: [id])
-  servicePurchaseId String?         @unique
+  servicePurchaseId String?          @unique
   servicePurchase   ServicePurchase? @relation(fields: [servicePurchaseId], references: [id])
-  status            QuotationStatus @default(DRAFT)
+  status            QuotationStatus  @default(DRAFT)
   documentUrl       String?
   notes             String?
-  createdAt         DateTime        @default(now())
-  updatedAt         DateTime        @updatedAt
+  createdAt         DateTime         @default(now())
+  updatedAt         DateTime         @updatedAt
 
   @@map("quotation")
 }
@@ -186,4 +188,14 @@ model RequestInvitation {
   updatedAt DateTime @updatedAt
 
   @@map("request_invitation")
+}
+
+model ServiceBundle {
+  id              String    @id @default(uuid())
+  bundleCreatorId String
+  buncleCreatedBy User      @relation(fields: [bundleCreatorId], references: [id])
+  services        Service[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }

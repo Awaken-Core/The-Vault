@@ -1,0 +1,34 @@
+import { AppSidebar } from "@/components/home/app-sidebar"
+import { SiteHeader } from "@/components/home/site-header"
+import { requireAuth } from "@/utils/auth-utils";
+import {
+    SidebarInset,
+    SidebarProvider,
+} from "@repo/ui";
+import { redirect } from "next/navigation";
+
+export default async function HomeLayout({ children }: { children: React.ReactNode }) {
+    const user = await requireAuth();
+
+    return (
+        <SidebarProvider
+            style={
+                {
+                    "--sidebar-width": "calc(var(--spacing) * 72)",
+                    "--header-height": "calc(var(--spacing) * 12)",
+                } as React.CSSProperties
+            }
+        >
+            <AppSidebar variant="inset" />
+            <SidebarInset>
+                <SiteHeader />
+                <div className="flex flex-1 flex-col">
+                    <div className="@container/main flex flex-1 flex-col gap-2">
+                        {children}
+                    </div>
+                </div>
+            </SidebarInset>
+        </SidebarProvider>
+    )
+};
+

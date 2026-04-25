@@ -16,7 +16,7 @@ export const useLogin = () => {
     return useMutation({
         mutationFn: loginApi,
         onSuccess: (data) => {
-            setUser(data.user);
+            setUser(data.user, data.token);
             toast.success(data.message);
             router.push('/');
         },
@@ -33,7 +33,7 @@ export const useRegister = () => {
     return useMutation({
         mutationFn: registerApi,
         onSuccess: (data) => {
-            setUser(data.user);
+            setUser(data.user, data.token);
             toast.success(data.message);
             router.push('/');
         },
@@ -50,7 +50,7 @@ export const useGoogleLogin = () => {
     return useMutation({
         mutationFn: googleLoginApi,
         onSuccess: (data) => {
-            setUser(data.user);
+            setUser(data.user, data.token);
             toast.success(data.message);
             router.push('/');
         },
@@ -78,13 +78,13 @@ export const useLogout = () => {
 };
 
 export const useCurrentUser = () => {
-    const setUser = useAuthStore((s) => s.setUser);
+    const updateUser = useAuthStore((s) => s.updateUser);
 
     return useQuery({
         queryKey: ['currentUser'],
         queryFn: async () => {
             const data = await getProfileApi();
-            setUser(data.user);
+            updateUser(data.user);
             return data.user;
         },
         retry: false,

@@ -11,6 +11,7 @@ export const ServerEnvSchema = z.object({
     EMAIL_USER: z.string().email(),
     EMAIL_PASS: z.string(),
     CLIENT_URL: z.string().url(),
+    ADMIN_URL: z.string().url(),
 });
 
 export type ServerEnv = z.infer<typeof ServerEnvSchema>;
