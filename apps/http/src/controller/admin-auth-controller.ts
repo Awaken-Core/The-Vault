@@ -47,6 +47,44 @@ export const BanUser = catchAsync(
     }
 );
 
+export const GetAllMembers = catchAsync(
+    async (req: AuthRequest, res: Response) => {
+        try {
+
+            const members = await client.user.findMany({
+                select: {
+                    name: true,
+                    email: true,
+                    emailVerified: true,
+                    image: true,
+                    isBanned: true,
+                    role: true,
+                    createdAt: true,
+                }
+            });
+
+            const normalMembers = members.filter((v) => v.role === "USER");
+            const adminMembers = members.filter((v) => v.role === "ADMIN");
+
+            res.status(200).json({
+                success: true,
+                message: "Members feteched successfully",
+                users: normalMembers,
+                admins: adminMembers,
+            });
+        }
+        catch (e) {
+            console.error(e);
+            res.status(500).json({
+                success: false,
+                message: "Failed to server request",
+            })
+        }
+    }
+);
+
+// Legacy Routes now we dont need this... 
+
 // Register new user
 export const register = catchAsync(
     async (req: AuthRequest, res: Response) => {
@@ -96,7 +134,7 @@ export const register = catchAsync(
             // });
 
             // Generate JWT
-            const token = generateToken(user.id);
+            const token = generateToken(user.id, user.role);
             const expiresAt = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000);
 
             await client.session.create({
@@ -198,7 +236,7 @@ export const login = catchAsync(
             }
 
             // Generate JWT
-            const token = generateToken(user.id);
+            const token = generateToken(user.id, user.role);
             const expiresAt = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000);
 
             await client.session.create({
@@ -299,7 +337,7 @@ export const googleLogin = catchAsync(
             }
 
             // Generate JWT
-            const token = generateToken(user.id);
+            const token = generateToken(user.id, user.role);
             const expiresAt = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000);
 
             await client.session.create({

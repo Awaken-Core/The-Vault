@@ -57,8 +57,8 @@ const data = {
       icon: IconContract,
     },
     {
-      title: "Users",
-      url: "/users",
+      title: "Members",
+      url: "/members",
       icon: IconUserPlus,
     },
     {
