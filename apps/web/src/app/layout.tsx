@@ -8,14 +8,9 @@ const geistSans = Geist({
   subsets: ["latin"],
 });
 
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
-  subsets: ["latin"],
-});
-
 export const metadata: Metadata = {
-  title: "Awaken Studios",
-  description: "A Dev/Design Studio",
+  title: "Awaken Studios | SaaS, MVP, Design & Growth Studio",
+  description: "Awaken Studios helps brands, founders, and business operators launch and grow with SaaS and MVP development, product design, marketing, SEO, AEO, and GEO.",
 };
 
 export default function RootLayout({
@@ -26,7 +21,7 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning>
       <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased`}
+        className={`${geistSans.variable} antialiased`}
       >
         <Providers>{children}</Providers>
       </body>

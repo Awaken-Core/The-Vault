@@ -1,21 +1,21 @@
-"use client";
-
-import { motion } from "motion/react";
+import ContactPage from "@/components/home/contact-page";
+import DesignCarousels from "@/components/home/design-carousels";
+import FaqPage from "@/components/home/faq-page";
+import FooterPage from "@/components/home/footer-page";
+import LandingPage from "@/components/home/landing-page";
+import ServicePage from "@/components/home/services-page";
 
 const Home = () => {
   return (
-    <div
-      className='min-h-screen w-full flex items-center justify-center text-[40px] font-medium font-sans tracking-[-1px] bg-[#c0c0c0] text-[#424242]'
-    >
-      <motion.p
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 1, ease: "easeInOut" }}
-      >
-        Awaken Studios.
-      </motion.p>
-    </div>
+    <main id="top" className="min-h-screen w-full overflow-hidden bg-[#f7f7f4] font-sans text-[#242424]">
+      <LandingPage />
+      <DesignCarousels />
+      <ServicePage />
+      <ContactPage />
+      <FaqPage />
+      <FooterPage />
+    </main>
   )
-}
+};
 
 export default Home;
