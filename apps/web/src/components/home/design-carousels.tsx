@@ -1,56 +1,31 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { getDesignCarouselItems } from "@/actions/design-actions";
 import FlexCarousel, { type FlexCarouselItem } from "./carousels";
-
-const DESIGNS_ENDPOINT = "https://design.mehulxbuilds.in/api/v1/design/all";
-
-interface DesignRecord {
-  id: string;
-  title: string;
-  description: string | null;
-  url: string;
-}
-
-interface DesignsResponse {
-  success: boolean;
-  design: DesignRecord[];
-}
 
 const DesignCarousels = () => {
   const [items, setItems] = useState<FlexCarouselItem[]>();
   const [loadFailed, setLoadFailed] = useState(false);
 
   useEffect(() => {
-    const controller = new AbortController();
+    let active = true;
 
     const loadDesigns = async () => {
       try {
-        const response = await fetch(DESIGNS_ENDPOINT, { signal: controller.signal });
-        if (!response.ok) throw new Error(`Design API returned ${response.status}`);
-
-        const data = (await response.json()) as DesignsResponse;
-        const designs = Array.isArray(data.design)
-          ? data.design
-            .filter((design) => design.url && design.title)
-            .map((design) => ({
-              src: design.url,
-              alt: design.description || `${design.title} design by Awaken Studios`,
-              title: design.title,
-              subtitle: design.description || "Awaken Studios",
-            }))
-          : [];
+        const designs = await getDesignCarouselItems();
 
         if (!designs.length) throw new Error("The design API returned no images");
-        setItems(designs);
-      } catch (error) {
-        if (error instanceof DOMException && error.name === "AbortError") return;
-        setLoadFailed(true);
+        if (active) setItems(designs);
+      } catch {
+        if (active) setLoadFailed(true);
       }
     };
 
     loadDesigns();
-    return () => controller.abort();
+    return () => {
+      active = false;
+    };
   }, []);
 
   return (
