@@ -1,0 +1,7 @@
+User-agent: *
+Allow: /
+Disallow: /sign-in
+Disallow: /sign-up
+
+Sitemap: https://awakenstudions.in/sitemap.xml
+
